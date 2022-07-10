@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💳App Financeiro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" async></script>
+
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react,stage-3">
+    const App = () => {
+        //Uso do UseState e useEffect
+
+        const {useState, useEffect} = React;
+
+        //data
+        const [selectReceita, setSelectReceita] = useState("");
+        const [receitaTotal, setReceitaTotal] = useState(false);
+        const [despesaTotal, setDespesaTotal] = useState(false);
+        const [receita, setReceita] = useState(true);
+        const [despesa, setDespesa] = useState(false);
+        const [reserva, setReserva] = useState(false);
+        const [resumoTotal, setResumoTotal] = useState(false);
+        const [totalReceita, setTotalReceita] = useState(null);
+        const [totalDespesa, setTotalDespesa] = useState(null);
+
+
+
+        const childToParent = (childData) => {
+        setTotalReceita(childData);
+      }
+
+      const childToParent2 = (childData) => {
+        setTotalDespesa(childData);
+      }
+
+      console.log(totalDespesa);
+
+      const total = totalReceita - totalDespesa;
+
+        const opcao = [
+            {tipo: "Receita"},
+            {tipo: "Despesa"},
+            {tipo: "Reserva"},
+            {tipo: "Resumo Total"}
+        ]
+
+
+            //Hook para atualização do Input
+            useEffect(()=>{
+                
+            if(selectReceita=="Receita"){
+
+                setReceita(currentReceita=>!currentReceita);
+                if(despesa){
+                    localStorage.setItem("totalDespesa",totalDespesa);
+                localStorage.setItem("totalReceita",totalReceita);
+                    setDespesa(currentDespesa=>!currentDespesa);
+                };
+                if(reserva){
+                    localStorage.setItem("totalDespesa",totalDespesa);
+                localStorage.setItem("totalReceita",totalReceita);
+                    setReserva(currentReserva=>!currentReserva);
+                };
+
+                if(resumoTotal){
+                    localStorage.setItem("totalDespesa",totalDespesa);
+                localStorage.setItem("totalReceita",totalReceita);
+                    setResumoTotal(currentResumo=>!currentResumo);
+                }
+            };
+
+            if(selectReceita=="Despesa"){
+                localStorage.setItem("totalDespesa",totalDespesa);
+                localStorage.setItem("totalReceita",totalReceita);
+                setDespesa(currentDespesa=>!currentDespesa);
+                if(receita){
+                    setReceita(currentReceita=>!currentReceita);
+                };
+                if(reserva){
+                    setReserva(currentReserva=>!currentReserva);
+                };
+
+                if(resumoTotal){
+                    setResumoTotal(currentResumo=>!currentResumo);
+                }
+            };
+
+            if(selectReceita=="Reserva"){
+                localStorage.setItem("totalDespesa",totalDespesa);
+                localStorage.setItem("totalReceita",totalReceita);
+                setReserva(currentReserva=>!currentReserva);
+                if(despesa){
+                    setDespesa(currentDespesa=>!currentDespesa);
+                };
+                if(receita){
+                    setReceita(currentReceita=>!currentReceita);
+                };
+
+                if(resumoTotal){
+                    setResumoTotal(currentResumo=>!currentResumo);
+                }
+            };
+
+            if(selectReceita=="Resumo Total"){
+                localStorage.setItem("totalDespesa",totalDespesa);
+                localStorage.setItem("totalReceita",totalReceita);
+                setResumoTotal(currentResumo=>!currentResumo);
+                if(despesa){
+                    setDespesa(currentDespesa=>!currentDespesa);
+                };
+                if(receita){
+                    setReceita(currentReceita=>!currentReceita);
+                };
+
+                if(reserva){
+                    setReserva(currentReserva=>!currentReserva);
+                }
+            };
+
+
+            },[selectReceita]);
+
+            useEffect(()=>{
+                const receita = localStorage.getItem("totalReceita");
+                const despesa = localStorage.getItem("totalDespesa");
+
+                if(receita){
+                    setTotalReceita(receita);
+                }
+
+                if(despesa){
+                    setTotalDespesa(despesa);
+                }
+
+
+            },[]);
+
+
+
+       
+        //JSX
+        return(
+        <main style={styles.main}>
+            <div style={styles.header}>App Financeiro</div>
+            {(!receitaTotal&&!despesaTotal)&&(<>
+                <label htmlFor="Entrada" style={styles.label}>Escolha a entrada</label>
+                <div><select  className="form-select form-select-sm mb-3" id="entrada" value={selectReceita} onChange={e => setSelectReceita(e.currentTarget.value)}>
+                    {opcao.map((item, index) => (
+                    <option key={index} value={item.tipo}>{item.tipo}</option>
+                    ))}        
+                </select>
+                </div></>)
+            }
+            
+            {receita && (<Receita childToParent = {childToParent}/>)}
+            {despesa && (<Despesa childToParent2 = {childToParent2}/>)}
+            {reserva && (<Reserva />)}
+            {resumoTotal && (
+                <div>
+                    <ul className="nav nav-tabs">
+                        <li className="nav-item">
+                            <div className="nav-link active" style={styles.pointer} aria-current="page" onClick={()=>setResumoReceita(currentResumo=>!currentResumo)}>Resumo</div>
+                        </li>
+                    </ul>   
+                    <div style={styles.total}>
+                            <div>
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Categoria</div> 
+                                    <div>Valor(R$)</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Receita</div> 
+                                    <div>{totalReceita}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Despesa</div> 
+                                    <div>{totalDespesa}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Total</div> 
+                                    <div>{total}</div>
+                                </div>
+
+                            </div>
+                            </div>
+                            </div>
+                                
+                            
+            )}
+
+
+ 
+
+            
+        </main>
+        )
+        
+
+    };
+
+    const Receita = ({childToParent})=>{
+ //Lógica das Receitas
+    const {useState, useEffect} = React;
+
+        //data
+        const [selectValueReceita, setSelectValueReceita] = useState(""); 
+        const [listaReceita, setListaReceita] = useState([]); 
+        const [descricaoReceita, setDescricaoReceita] = useState("");
+        const [proximoId2, setProximoId2] = useState(1);
+        const [valorReceita, setValorReceita] = useState("");
+        const [diaReceita, setDiaReceita] = useState("");
+        const [receitaTotal, setReceitaTotal] = useState(false);
+        const [resumoReceita, setResumoReceita] = useState(true);
+        const [receitaSoma, setReceitaSoma] = useState(null);
+        const [receitaEmpresa1, setReceitaEmpresa1] = useState(null);
+        const [receitaEmpresa2, setReceitaEmpresa2] = useState(null);
+        const [receitaOutros, setReceitaOutros] = useState(null);
+        const [listaValorReceita, setListaValorReceita] = useState([]);
+        const [to, setTo] = useState(null);
+        const listaGraficoReceita = [{nome: receitaEmpresa1},{nome: receitaEmpresa2}, {nome: receitaOutros}]
+        const listReceita = [
+            {id: 0, name: 'Selecione o tipo'},
+            {id: 1, name: 'Empresa1'},
+            {id: 2, name: 'Empresa2'},
+            {id: 3, name: 'Outros'}
+        ];
+
+      
+        
+
+        //Funções
+        function gravarReceita(){
+            if(!selectValueReceita||!descricaoReceita||!valorReceita||!diaReceita){
+                alert("Favor preencher todos os campos!")
+            }else{
+            if(to){
+                const index = listaReceita.findIndex((item) => item.id == to.id);
+                listaReceita[index] = to;
+                //iguala o valor para fazer o CRUD
+                to.categoria = selectValueReceita;
+                to.tipo = descricaoReceita;
+                to.valor = valorReceita;
+                to.dia=diaReceita;
+                const novaLista = JSON.stringify(listaReceita);
+                localStorage.setItem("listaReceita", novaLista);
+                setDescricaoReceita("");
+                setSelectValueReceita("");
+                setValorReceita("");
+                setDiaReceita("");
+                setReceitaTotal(currentReceitaTotal => !currentReceitaTotal);
+                setTo(null);
+
+                
+
+            }else{
+                const newLista = [...listaReceita, {categoria: selectValueReceita, tipo: descricaoReceita, id: proximoId2, valor:valorReceita, dia: diaReceita}]
+                setListaReceita(newLista);
+                setProximoId2(proximoId2+1);
+                localStorage.setItem("proximoId2", proximoId2);
+                const novaLista = JSON.stringify(newLista);
+                localStorage.setItem("listaReceita", novaLista);
+                setDescricaoReceita("");
+                setSelectValueReceita("");
+                setValorReceita("");
+                setDiaReceita("");
+                setReceitaTotal(currentReceitaTotal => !currentReceitaTotal);
+
+            }
+
+
+            
+            }
+        };
+
+        //nesta função recebe o index e faz o splice para apagar o item
+        const remove = index => {
+            const newReceita = [...listaReceita];
+            newReceita.splice(index, 1);
+            setListaReceita(newReceita);
+            const novaLista = JSON.stringify(newReceita);
+            localStorage.setItem("listaReceita", novaLista);
+
+
+            
+        };
+
+        //Nesta função recebe o index para fazer a modificação do item e joga o valor do text no input para facilitar
+        const editar = index => {
+            const to = listaReceita[index]
+            setTo(listaReceita[index]);
+            setSelectValueReceita(to.categoria);
+            setDescricaoReceita(to.tipo);
+            setValorReceita(to.valor);
+            setDiaReceita(to.dia);
+            setReceitaTotal(currentEdit=>!currentEdit);
+
+        };
+
+
+
+
+
+        //Hook para atualização do Input
+
+
+        useEffect(()=>{
+            let total = 0;
+                let emp = 0;
+                let emp2 = 0;
+                let outros = 0;
+                for (const item of listaReceita) {
+                    total += parseInt(item.valor);
+                    setReceitaSoma(total);
+
+                    if(item.categoria=="Empresa1"){
+                        emp+=parseInt(item.valor);
+                        setReceitaEmpresa1(emp);
+                    }
+
+                    if(item.categoria=="Empresa2"){
+                        emp2+=parseInt(item.valor);
+                        setReceitaEmpresa2(emp2);
+                    }
+
+                    if(item.categoria=="Outros"){
+                        outros+=parseInt(item.valor);
+                        setReceitaOutros(outros);
+                    }
+
+                    childToParent(receitaSoma);
+
+                    
+                }
+
+                listaReceita.sort((a,b)=>{
+                    if(a.categoria>b.categoria){
+                        return 1;
+                    }
+                    if(a.categoria<b.categoria){
+                        return -1;
+                    }
+
+                    return 0
+                },[listaReceita]);
+
+                
+                
+               
+            
+        });
+
+        useEffect(()=>{
+            const listaReceita2 = localStorage.getItem("listaReceita");
+            const id = localStorage.getItem("proximoId2");
+            if (listaReceita2) {
+                const newLista = JSON.parse(listaReceita2);
+                setListaReceita(newLista);
+              
+            }
+
+            if (id){
+                setProximoId2(parseInt(id));
+            };
+                    
+                
+        },[]);
+
+
+
+        return (
+           <> {!receitaTotal && (
+                <div>
+                <label htmlFor="Categoria" style={styles.label}>Receitas</label>
+                <form onSubmit={gravarReceita}>
+                <select className="form-select form-select-sm mb-3" value={selectValueReceita} onChange={e => setSelectValueReceita(e.currentTarget.value)}>
+                    {listReceita.map((item, index) => (
+                    <option key={item.id} value={item.name}>{item.name}</option>
+                    ))}        
+                </select>
+                
+                <div className="mb-3">
+                    <label htmlFor="exampleFormControlInput1" className="form-label">Descrição</label>
+                    <input type="text" className="form-control" id="exampleFormControlInput1" value={descricaoReceita} placeholder="Escreva a descrição da despesa" onChange={e => setDescricaoReceita(e.currentTarget.value)}/>
+                </div>
+
+                <div className="input-group mb-3 d-flex flex-column">
+                    <div>
+                        <label htmlFor="valor" className="form-label">Valor</label>
+                    </div>
+                    <div className="d-flex flex-row">
+                        <span className="input-group-text" id="basic-addon1">R$</span>
+                        <input type="number" id="valor" className="form-control" placeholder="Escreva o valor" aria-describedby="basic-addon1" value={valorReceita} onChange={e => setValorReceita(e.currentTarget.value)}/>
+                    </div>
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="dia" className="form-label">Dia</label>
+                    <input type="number" className="form-control" id="dia" value={diaReceita} placeholder="Escreva o dia" onChange={e=>setDiaReceita(e.currentTarget.value)}/>
+                </div>
+                <button type="submit" className="btn btn-primary" >Gravar</button>
+                </form>
+                
+            </div>
+            )}
+
+            {receitaTotal &&(
+                <div>
+                    <ul className="nav nav-tabs">
+                        <li className="nav-item">
+                            <div className="nav-link active" style={styles.pointer} aria-current="page" onClick={()=>setResumoReceita(currentResumo=>!currentResumo)}>Resumo</div>
+                        </li>
+                        <li className="nav-item">
+                            <div className="nav-link" style={styles.pointer} aria-current="page" onClick={()=>setResumoReceita(currentResumo=>!currentResumo)}>Detalhes</div>
+                        </li>
+                    </ul>   
+                    <div style={styles.total}>
+                        {resumoReceita&&
+                            (
+                            <div>
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Categoria</div> 
+                                    <div>Valor(R$)</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Empresa1</div> 
+                                    <div>{receitaEmpresa1}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Empresa2</div> 
+                                    <div>{receitaEmpresa2}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Outros</div> 
+                                    <div>{receitaOutros}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Total</div> 
+                                    <div>{receitaSoma}</div>
+                                </div>
+                            </div>
+                            
+                            )
+                        } 
+
+                        {!resumoReceita&&
+                            (
+                            <div>
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Categoria</div> 
+                                    <div>Detalhes</div>
+                                </div>
+                                {listaReceita.map((item,index)=><div style={styles.borderFinal}><div style={styles.flex2}><h5 key={item.index}>{(index == 0 || item.categoria != listaReceita[index - 1].categoria) &&(item.categoria)}</h5>
+                                        <div style={styles.flex3}>
+                                            <div style={styles.flex3}>Dia</div> <div>{item.dia}</div>
+                                        </div>
+                                        <div style={styles.flex3}>
+                                            <div style={styles.flex3}>Descrição</div> <div>{item.tipo}</div>
+                                        </div>
+                                        <div style={styles.flex3}>
+                                            <div style={styles.flex3}>Valor</div> <div>{item.valor}</div>
+                                        </div>
+
+                                        <span className="flex flex-row"><svg onClick={() => editar(index)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
+                                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                            </svg><svg onClick={() => remove(index)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </span>
+                                    </div></div>)}
+                            </div>
+                            
+                            )
+                        } 
+                    </div>
+                    <button type="button" style={styles.botao} className="btn btn-primary" onClick={()=>setReceitaTotal(currentreceitaTotal=> !currentreceitaTotal) }>Voltar</button>
+                
+                </div>
+            )}
+
+            <GraficoReceita listaGraficoReceita={listaGraficoReceita}/>
+
+           
+
+        </>
+
+        )
+
+
+    }
+
+
+    const Despesa = ({childToParent2})=>{
+        //Lógica das despesas
+        const {useState, useEffect} = React;
+
+        //data
+        const [selectValue, setSelectValue] = useState(""); 
+        const [listaDespesa, setListaDespesa] = useState([]); 
+        const [descricao, setDescricao] = useState("");
+        const [proximoId, setProximoId] = useState(1);
+        const [valor, setValor] = useState(null);
+        const [receita, setReceita] = useState(true);
+        const [dia, setDia] = useState(null);
+        const [despesaTotal, setDespesaTotal] = useState(false);
+        const [resumoDespesa, setResumoDespesa] = useState(true);
+        const [despesaAlimentacao, setDespesaAlimentacao] = useState(null);
+        const [despesaContas, setDespesaContas] = useState(null);
+        const [despesaAluguel, setDespesaAluguel] = useState(null);
+        const [despesaLazer, setdespesaLazer] = useState(null);
+        const [despesaOutros, setDespesaOutros] = useState(null);
+        const [despesaSoma, setDespesaSoma]=useState(null);
+        const [to,setTo]=useState(null);
+        var listaGraficoDespesa = [{nome: despesaAlimentacao}, {nome: despesaContas}, {nome: despesaAluguel}, {nome: despesaLazer}, {nome: despesaOutros}]
+        
+ 
+
+        const list = [
+            {id: 0, name: 'Selecione o tipo'},
+            {id: 1, name: 'Alimentação'},
+            {id: 2, name: 'Contas'},
+            {id: 3, name: 'Aluguel'},
+            {id: 4, name: 'Lazer'},
+            {id: 5, name: 'Outros'}
+        ];
+
+
+
+
+
+        //Funções
+        function gravar(){
+            if(!selectValue||!descricao||!valor||!dia){
+                alert("Favor preencher todos os campos!")
+            }else{
+            if(to){
+                const index = listaDespesa.findIndex((item) => item.id == to.id);
+                listaDespesa[index] = to;
+                //iguala o valor para fazer o CRUD
+                to.categoria = selectValue;
+                to.tipo = descricao;
+                to.valor = valor;
+                to.dia=dia;
+                const novaLista = JSON.stringify(listaDespesa);
+                localStorage.setItem("listaDespesa", novaLista);
+                setDescricao("");
+                setSelectValue("");
+                setValor("");
+                setDia("");
+                setDespesaTotal(currentReceitaTotal => !currentReceitaTotal);
+                setTo(null);
+                
+                   
+
+               
+
+            }else{
+            const newLista = [...listaDespesa, {categoria: selectValue, tipo: descricao, id: proximoId, valor:valor, dia: dia}]
+            setListaDespesa(newLista);
+            setProximoId(proximoId+1);
+            localStorage.setItem("proximoId", proximoId);
+            const novaLista = JSON.stringify(newLista);
+            localStorage.setItem("listaDespesa", novaLista);
+            setDescricao("");
+            setSelectValue("");
+            setValor("");
+            setDia("");
+            setDespesaTotal(currentDespesa=>!currentDespesa);
+            
+
+            
+            }
+            }
+        };
+
+
+
+        useEffect(()=>{
+            let total = 0;
+                let ali = 0;
+                let con = 0;
+                let imp = 0;
+                let diz = 0;
+                let outros = 0;
+                for (const item of listaDespesa) {
+                    total += parseInt(item.valor);
+                    setDespesaSoma(total);
+
+                    if(item.categoria=="Alimentação"){
+                        ali+=parseInt(item.valor);
+                        setDespesaAlimentacao(ali);
+                    }
+
+                    if(item.categoria=="Contas"){
+                        con+=parseInt(item.valor);
+                        setDespesaContas(con);
+                    }
+
+                    if(item.categoria=="Aluguel"){
+                        imp+=parseInt(item.valor);
+                        setDespesaAluguel(imp);
+                    }
+
+                    if(item.categoria=="Lazer"){
+                        diz+=parseInt(item.valor);
+                        setdespesaLazer(diz);
+                    }
+
+                    if(item.categoria=="Outros"){
+                        outros+=parseInt(item.valor);
+                        setDespesaOutros(outros);
+                    }
+
+                    childToParent2(despesaSoma);
+                    
+
+
+
+                }
+
+                listaDespesa.sort((a,b)=>{
+                    if(a.categoria>b.categoria){
+                        return 1;
+                    }
+                    if(a.categoria<b.categoria){
+                        return -1;
+                    }
+
+                    return 0
+                },[listaDespesa]);
+
+                
+                
+               
+            
+        });
+
+                //Hook para recuperação dos dados no localStorage
+                useEffect(()=>{
+            const listaDespesa2 = localStorage.getItem("listaDespesa");
+            const id = localStorage.getItem("proximoId");
+            if (listaDespesa2) {
+                const newLista = JSON.parse(listaDespesa2);
+                setListaDespesa(newLista);
+              
+            }
+
+            if (id){
+                setProximoId(parseInt(id));
+            };
+                    
+                
+        },[]);
+
+
+
+
+        //nesta função recebe o index e faz o splice para apagar o item
+        const remove = index => {
+            const newDespesa = [...listaDespesa];
+            newDespesa.splice(index, 1);
+            setListaDespesa(newDespesa);
+            const novaLista = JSON.stringify(newDespesa);
+            localStorage.setItem("listaDespesa", novaLista);
+            
+        };
+
+        //Nesta função recebe o index para fazer a modificação do item e joga o valor do text no input para facilitar
+        const editar = index => {
+            const to = listaDespesa[index]
+            setTo(listaDespesa[index]);
+            setSelectValue(to.categoria);
+            setDescricao(to.tipo);
+            setValor(to.valor);
+            setDia(to.dia);
+            setDespesaTotal(currentEdit=>!currentEdit);
+        };
+
+
+
+       
+        return(
+            <>{!despesaTotal &&(
+            <div>
+                <label htmlFor="Categoria" style={styles.label}>Despesas</label>
+                <form onSubmit={gravar}>
+                <select className="form-select form-select-sm mb-3" value={selectValue} onChange={e => setSelectValue(e.currentTarget.value)}>
+                    {list.map((item, index) => (
+                    <option key={item.id} value={item.name}>{item.name}</option>
+                    ))}        
+                </select>
+                <div className="mb-3">
+                    <label htmlFor="exampleFormControlInput1" className="form-label">Descrição</label>
+                    <input type="text" className="form-control" id="exampleFormControlInput1" value={descricao} placeholder="Escreva a descrição da despesa" onChange={e => setDescricao(e.currentTarget.value)}/>
+                </div>
+
+                <div className="input-group mb-3 d-flex flex-column">
+                    <div>
+                        <label htmlFor="valor" className="form-label">Valor</label>
+                    </div>
+                    <div className="d-flex flex-row">
+                        <span className="input-group-text" id="basic-addon1">R$</span>
+                        <input type="number" id="valor" className="form-control" placeholder="Escreva o valor" aria-describedby="basic-addon1" value={valor} onChange={e => setValor(e.currentTarget.value)}/>
+                    </div>
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="dia" className="form-label">Dia</label>
+                    <input type="number" className="form-control" id="dia" value={dia} placeholder="Escreva o dia" onChange={e=>setDia(e.currentTarget.value)}/>
+                </div>
+                <button type="submit" className="btn btn-primary" >Gravar</button>
+                </form>
+            </div>
+            )}
+
+            {despesaTotal &&(
+                <div>
+                    <ul className="nav nav-tabs">
+                        <li className="nav-item">
+                            <div className="nav-link active" style={styles.pointer} aria-current="page" onClick={()=>setResumoDespesa(currentResumo=>!currentResumo)}>Resumo</div>
+                        </li>
+                        <li className="nav-item">
+                            <div className="nav-link" style={styles.pointer} aria-current="page" onClick={()=>setResumoDespesa(currentResumo=>!currentResumo)}>Detalhes</div>
+                        </li>
+                    </ul>   
+                    <div style={styles.total}>
+                        {resumoDespesa&&
+                            (
+                            <div>
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Categoria</div> 
+                                    <div>Valor(R$)</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Alimentação</div> 
+                                    <div>{despesaAlimentacao}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Contas</div> 
+                                    <div>{despesaContas}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Aluguel</div> 
+                                    <div>{despesaAluguel}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Lazer</div> 
+                                    <div>{despesaLazer}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Outros</div> 
+                                    <div>{despesaOutros}</div>
+                                </div>
+
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Total</div> 
+                                    <div>{despesaSoma}</div>
+                                </div>
+                            </div>
+                            
+                            )
+                        } 
+
+                        {!resumoDespesa&&
+                            (
+                            <div>
+                                <div style={styles.flex} >
+                                    <div  style={styles.flex}>Categoria</div> 
+                                    <div>Detalhes</div>
+                                </div>
+                                {listaDespesa.map((item,index)=><div style={styles.borderFinal}><div style={styles.flex2}><h5 key={item.index}>{(index == 0 || item.categoria != listaDespesa[index - 1].categoria) &&(item.categoria)}</h5>
+                                        <div style={styles.flex3}>
+                                            <div style={styles.flex3}>Dia</div> <div>{item.dia}</div>
+                                        </div>
+                                        <div style={styles.flex3}>
+                                            <div style={styles.flex3}>Descrição</div> <div>{item.tipo}</div>
+                                        </div>
+                                        <div style={styles.flex3}>
+                                            <div style={styles.flex3}>Valor</div> <div>{item.valor}</div>
+                                        </div>
+
+                                        <span className="flex flex-row"><svg onClick={() => editar(index)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
+                                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                            </svg><svg onClick={() => remove(index)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </span>
+                                    </div></div>)}
+                            </div>
+                            
+                            )
+                        } 
+                    </div>
+                    <button type="button" style={styles.botao} className="btn btn-primary" onClick={()=>setDespesaTotal(currentreceitaTotal=> !currentreceitaTotal) }>Voltar</button>
+                    
+                </div>
+            )}
+            <GraficoDespesa listaGraficoDespesa={listaGraficoDespesa}/>
+            </>
+
+            
+        )
+    };
+
+    const Reserva = ()=>{
+
+        const{useState,useEffect}=React;
+            //Lógica para reserva
+            const [selectReserva, setSelectReserva] = useState("");
+            const[listaReserva, setListaReserva] = useState([]);
+            const[valorReserva, setValorReserva] = useState(null);
+            const [proximoId3,setProximoId3] = useState(1);
+            const[reservaTotal, setReservaTotal] = useState(false);
+            const[to,setTo] = useState(null);
+            const[reservaBradesco, setReservaBradesco] = useState(null);
+            const[reservaItau, setReservaItau] = useState(null);
+            const[reservaBrasil, setReservaBrasil] = useState(null);
+            const[reservaOutros, setReservaOutros] = useState(null);
+            const[reservaSoma,setReservaSoma] = useState(null);
+            const[resumo,setResumo]=useState(true);
+            const[aviso,setAviso]=useState(0);
+            const listaGrafico = [{nome: reservaBradesco},{nome: reservaItau}, {nome: reservaBrasil}, {nome: reservaOutros}, {nome: reservaSoma}]
+                        
+            
+
+
+
+            const listReserva = [
+                {id: 0, name: 'Selecione o tipo'},
+                {id: 1, name: 'Bradesco'},
+                {id: 2, name: 'Itau'},
+                {id: 3, name: 'Brasil'},
+                {id: 4, name: 'Outros'}
+            ];
+
+            //Hook para recuperação no localStorage 
+            useEffect(()=>{
+            const listaReserva2 = localStorage.getItem("listaReserva");
+            const id3 = localStorage.getItem("proximoId3");
+
+
+            if (listaReserva2) {
+                const newLista3 = JSON.parse(listaReserva2);
+                setListaReserva(newLista3);
+            }
+
+            if (id3){
+                setProximoId3(parseInt(id3));
+            };
+
+                
+        },[]);
+
+            function gravarReserva(){
+                if(selectReserva&&valorReserva){
+                    const newList = [...listaReserva, {banco: selectReserva, valor: valorReserva, id: proximoId3}]
+                    setListaReserva(newList);
+                    setProximoId3(proximoId3+1);
+                    localStorage.setItem("proximoId3", proximoId3);
+                    const novaLista = JSON.stringify(newList);
+                    localStorage.setItem("listaReserva", novaLista);
+                    setValorReserva("");
+                    setSelectReserva("");
+                    setReservaTotal(currentReserva=>!currentReserva);
+                    
+                }else{
+                    alert("Favor preencher todos os campos!");
+ 
+                };
+                };
+
+
+                useEffect(()=>{
+                    
+                let total = 0;
+                let nova = 0;
+                let man = 0;
+                let Brasil = 0;
+                let outros = 0;
+                for (const item of listaReserva) {
+                    total += parseInt(item.valor);
+                    setReservaSoma(total);
+
+                    if(item.banco=="Bradesco"){
+                        nova+=parseInt(item.valor);
+                        setReservaBradesco(nova);
+                    }
+
+                    if(item.banco=="Itau"){
+                        man+=parseInt(item.valor);
+                        setReservaItau(man);
+                    }
+
+                    if(item.banco=="Brasil"){
+                        Brasil+=parseInt(item.valor);
+                        setReservaBrasil(Brasil);
+                    }
+
+                    if(item.banco=="Outros"){
+                        outros+=parseInt(item.valor);
+                        setReservaOutros(outros);
+                    }
+
+                   
+                
+
+               
+            }
+            },[listaReserva]);
+
+     
+            function lista(){
+                const lista = [{nome: reservaBradesco}, {nome: reservaItau}, {nome: reservaBrasil}, {nome: reservaOutros}, {nome: reservaSoma}]
+                    setListaGrafico(lista);
+                    const novaLista = JSON.stringify(lista);
+                    localStorage.setItem("listaGrafico", novaLista);
+            }
+
+
+             //Hook para atualização do Input e para soma no resumo reserva
+        
+
+            function limpar(){
+                setAviso(aviso+1);
+                if(aviso==0){
+                    alert("Tem certeza? Se sim clique de novo no limpar");
+                };
+                if(aviso>0){
+                    setListaReserva([]);
+                    const novaLista = [];
+                    localStorage.setItem("listaReserva", novaLista);
+                    setProximoId3(1);
+                    localStorage.setItem("proximoId3", proximoId3);
+                    document.location.reload(true);
+                }
+
+            }
+
+
+            return (
+            <section>
+                {!reservaTotal&&(
+                <div>
+                    <label htmlFor="Categoria" style={styles.label}>Reserva</label>
+                    <form onSubmit={gravarReserva}>
+                    <select className="form-select form-select-sm mb-3" value={selectReserva} onChange={e => setSelectReserva(e.currentTarget.value)}>
+                        {listReserva.map((item, index) => (
+                        <option key={item.id} value={item.name}>{item.name}</option>
+                        ))}        
+                    </select>
+
+                    <div className="input-group mb-3 d-flex flex-column">
+                        <div>
+                            <label htmlFor="valor" className="form-label">Valor</label>
+                        </div>
+                        <div className="d-flex flex-row">
+                            <span className="input-group-text" id="basic-addon1">R$</span>
+                            <input type="number" id="valor" className="form-control" placeholder="Escreva o valor" aria-describedby="basic-addon1" onChange={e => setValorReserva(e.currentTarget.value)}/>
+                        </div>
+                    </div>
+
+                    <button type="submit" className="btn btn-primary" >Gravar</button>
+                    </form>
+                </div>
+                )}
+
+                    
+                    {reservaTotal&&
+                        (
+                        <div>
+                            <ul className="nav nav-tabs">
+                                <li className="nav-item">
+                                    <div className="nav-link active" style={styles.pointer} aria-current="page" onClick={()=>setResumoDespesa(currentResumo=>!currentResumo)}>Resumo</div>
+                                </li>
+                            </ul>   
+                                    
+                            <div style={styles.main}>
+                                            {resumo&&(
+                                            <div style={styles.main} >
+                                            <div style={styles.flex4}>
+                                                <div  style={styles.flex}>Banco</div> 
+                                                <div>Valor(R$)</div>
+                                            </div>
+                                        
+
+                                                <div style={styles.flex} >
+                                                    <div  style={styles.flex}>Inter</div> 
+                                                    <div>{reservaBradesco}</div>
+                                                </div>
+
+                                                <div style={styles.flex} >
+                                                    <div  style={styles.flex}>Itau</div> 
+                                                    <div>{reservaItau}</div>
+                                                </div>
+
+                                                <div style={styles.flex} >
+                                                    <div  style={styles.flex}>Brasil</div> 
+                                                    <div>{reservaBrasil}</div>
+                                                </div>
+
+                                                <div style={styles.flex} >
+                                                    <div  style={styles.flex}>Outros</div> 
+                                                    <div>{reservaOutros}</div>
+                                                </div>
+
+                                                <div style={styles.flex} >
+                                                    <div  style={styles.flex}>Total</div> 
+                                                    <div>{reservaSoma}</div>
+                                                </div>
+                                    
+                                
+                                                <button type="button" style={styles.botao} className="btn btn-primary" onClick={()=>setReservaTotal(currentreceitaTotal=> !currentreceitaTotal) }>Voltar</button>
+                                                <button type="button" style={styles.botao} className="btn btn-primary" onClick={limpar}>Limpar</button>
+                                            </div> 
+                                            )}
+                                        </div>
+                                       
+                        </div>
+                                        
+                        )
+                        } 
+
+                        <Grafico listaGrafico={listaGrafico}/>
+
+                        
+
+      
+                </section>)
+            
+        };
+
+
+        const GraficoDespesa = ({listaGraficoDespesa})=>{
+            const {useState, useEffect} = React;
+            const lista = listaGraficoDespesa.map((item)=>item.nome);
+
+
+            
+            useEffect(()=>{
+            
+                const node = this.node;
+
+                const porcentagem = lista[0]+lista[1]+lista[2]+lista[3]+lista[4];
+
+            var chartExist = Chart.getChart(node); 
+            if (chartExist != undefined){  
+            chartExist.destroy(); }
+
+            Chart.defaults.font.size = 20;
+                var myChart = new Chart(node, {
+                type: "pie",
+                data: {
+                    labels: ["Alimentação", "Contas", "Aluguel","Lazer","Outros"],
+                    datasets: [
+                    {
+            label: "Despesa em %",
+            data: [(lista[0]*100/porcentagem).toFixed(0),(lista[1]*100/porcentagem).toFixed(0),(lista[2]*100/porcentagem).toFixed(0),(lista[3]*100/porcentagem).toFixed(0),(lista[4]*100/porcentagem).toFixed(0)],
+            backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+            "rgba(241, 196, 15 , 0.7)",
+            "rgba(23, 32, 42 , 0.7)",
+            ]
+            }
+            ]
+            }, 
+            options: {
+        responsive: true,
+        plugins: {
+            legend: {
+            display: true,
+            },
+            title: {
+            display: true,
+            text: "Despesa em porcentagem",
+            font: {
+                size: 30,
+            },
+            },
+        },
+        },
+
+            
+            });
+
+        },[listaGraficoDespesa]);
+
+            return(
+                <canvas
+                            style={{ width: 800, height: 300 }}
+                            ref={node => (this.node = node)}
+                        />
+            )
+        }
+
+
+        const GraficoReceita = ({listaGraficoReceita})=>{
+            const {useState, useEffect} = React;
+            const lista = listaGraficoReceita.map((item)=>item.nome);
+
+
+            
+            useEffect(()=>{
+            
+                const node = this.node;
+
+            var chartExist = Chart.getChart(node); 
+            if (chartExist != undefined){  
+            chartExist.destroy(); }
+
+            const porcentagem = lista[0]+lista[1]+lista[2];
+
+            Chart.defaults.font.size = 20;
+                var myChart = new Chart(node, {
+                type: "pie",
+                data: {
+                    labels: ["Empresa1", "Empresa2", "Outros"],
+                    datasets: [
+                    {
+            label: "Receita",
+            data: [(lista[0]*100/porcentagem).toFixed(0),(lista[1]*100/porcentagem).toFixed(0),(lista[2]*100/porcentagem).toFixed(0)],
+            backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+
+            ]
+            }
+            ]
+            },
+            options: {
+        responsive: true,
+        plugins: {
+            legend: {
+            display: true,
+            },
+            title: {
+            display: true,
+            text: "Receita em porcentagem",
+            font: {
+                size: 30,
+            },
+            },
+        },
+        },
+            
+            });
+
+        },[listaGraficoReceita]);
+
+            return(
+                <canvas
+                            style={{ width: 800, height: 300 }}
+                            ref={node => (this.node = node)}
+                        />
+            )
+        }
+
+        const Grafico = ({listaGrafico})=>{
+            const {useState, useEffect} = React;
+            const lista = listaGrafico.map((item)=>item.nome);
+
+
+            
+            useEffect(()=>{
+            
+                const node = this.node;
+
+            var chartExist = Chart.getChart(node); 
+            if (chartExist != undefined){  
+            chartExist.destroy(); }
+
+            Chart.defaults.font.size = 25;
+                var myChart = new Chart(node, {
+                type: "bar",
+                data: {
+                    labels: ["Bradesco", "Itau", "Brasil","Outros"],
+                    datasets: [
+                    {
+            label: "Reserva",
+            data: [lista[0],lista[1],lista[2],lista[3]],
+            backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+            "rgba(241, 196, 15 , 0.7)",
+
+            ]
+            }
+            ]
+            },
+            options: {
+        plugins: {
+            legend: {
+                labels: {
+                    // This more specific font property overrides the global property
+                    font: {
+                        size: 35
+                    }
+                }
+            }
+        }
+    }
+            
+            });
+
+
+        },[listaGrafico]);
+
+            return(
+                <canvas
+                            style={{ width: 800, height: 300 }}
+                            ref={node => (this.node = node)}
+                        />
+            )
+        }
+
+        
+
+        
+        ReactDOM.render(<App />, document.getElementById("root"));
+        </script>
+
+<script src="style.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+</body>
+</html>
+</body>
+</html>
