@@ -239,8 +239,12 @@
 
         //Funções
         function gravarReceita(){
-            if(!selectValueReceita||!descricaoReceita||!valorReceita||!diaReceita){
-                alert("Favor preencher todos os campos!")
+            if(!selectValueReceita||!descricaoReceita||!valorReceita||!diaReceita||valorReceita<0){
+                if(valorReceita<0){
+                    alert("Não é possível colocar valor negativo");
+                }else{
+                    alert("Favor preencher todos os campos!");
+                }
             }else{
             if(to){
                 const index = listaReceita.findIndex((item) => item.id == to.id);
@@ -543,8 +547,12 @@
 
         //Funções
         function gravar(){
-            if(!selectValue||!descricao||!valor||!dia){
-                alert("Favor preencher todos os campos!")
+            if(!selectValue||!descricao||!valor||!dia||valor<0){
+                if(valor<0){
+                    alert("Não é possível colocar valor negativo");
+                }else{
+                    alert("Favor preencher todos os campos!");
+                }
             }else{
             if(to){
                 const index = listaDespesa.findIndex((item) => item.id == to.id);
@@ -871,7 +879,7 @@
         },[]);
 
             function gravarReserva(){
-                if(selectReserva&&valorReserva){
+                if(selectReserva&&valorReserva>0){
                     const newList = [...listaReserva, {banco: selectReserva, valor: valorReserva, id: proximoId3}]
                     setListaReserva(newList);
                     setProximoId3(proximoId3+1);
@@ -883,7 +891,11 @@
                     setReservaTotal(currentReserva=>!currentReserva);
                     
                 }else{
-                    alert("Favor preencher todos os campos!");
+                    if(valorReserva<=0){
+                        alert("Não é possível colocar valor negativo ou zero");
+                    }else{
+                        alert("Favor preencher todos os campos!");
+                    }
  
                 };
                 };
@@ -1003,7 +1015,7 @@
                                         
 
                                                 <div style={styles.flex} >
-                                                    <div  style={styles.flex}>Inter</div> 
+                                                    <div  style={styles.flex}>Bradesco</div> 
                                                     <div>{reservaBradesco}</div>
                                                 </div>
 
